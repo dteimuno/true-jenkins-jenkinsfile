@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+    tools {
+       maven 'maven-3.9' 
+    }
+    stages {
+        stage('build jar') {
+            steps {
+                echo "Building the application...."
+                sh 'mvn package'
+            }
+        }
+        stage('build image') {
+            steps {
+                echo "Building the docker image..."
+                withCredentials([usernamePassword(credentialsId: 'dockercredentials', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                    sh 'docker build -t dteimuno/demo-app:v2.0 .'
+                    sh 'echo "$PASSWORD"| docker login -u $USERNAME --password-stdin '
+                    sh 'docker push dteimuno/demo-app:v2.0'
+                }
+                
+            }
+        }
+        stage('deploy') {
+            steps {
+                echo "Deploying the application..."
+            }
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
